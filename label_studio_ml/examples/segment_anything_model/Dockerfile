@@ -30,9 +30,6 @@ RUN --mount=type=cache,target="/var/cache/apt",sharing=locked \
 COPY download_models.sh .
 RUN bash /app/download_models.sh
 
-# Copy any models
-COPY 
-
 # install base requirements
 COPY requirements-base.txt .
 RUN --mount=type=cache,target=${PIP_CACHE_DIR},sharing=locked \
