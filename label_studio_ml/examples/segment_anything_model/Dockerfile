@@ -31,7 +31,7 @@ COPY download_models.sh .
 RUN bash /app/download_models.sh
 
 # Copy model files
-COPY models/ ./models/
+COPY models/ models/
 
 # install base requirements
 COPY requirements-base.txt .
