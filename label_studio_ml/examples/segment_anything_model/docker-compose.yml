@@ -24,7 +24,7 @@ services:
       # specify these parameters if you want to use basic auth for the model server
       - BASIC_AUTH_USER=
       - BASIC_AUTH_PASS=
-      # Change this to your model name: MobileSAM or SAM
+      # Change this to your model name: MobileSAM or SAM or SIMPLE_MODEL
       - SAM_CHOICE=MobileSAM
       - LOG_LEVEL=DEBUG
       # Enable this to use the GPU
