@@ -8,13 +8,14 @@ from label_studio_ml.model import LabelStudioMLBase
 
 SAM_CHOICE = os.environ.get("SAM_CHOICE", "MobileSAM")  # other option is just SAM
 
+import logging
+
 logger = logging.getLogger(__name__)
 
 
 try:
     PREDICTOR = SAMPredictor(SAM_CHOICE)
 except Exception as e:
-    import logging
     logger.debug('Error creating SAM predictor', exc_info=e)
 
 
