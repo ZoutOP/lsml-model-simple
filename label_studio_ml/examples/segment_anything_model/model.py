@@ -13,7 +13,7 @@ try:
 except Exception as e:
     import logging
     logger = logging.getLogger(__name__)
-    logger.exception('Error creating SAM predictor', exc_info=e)
+    logger.info('Error creating SAM predictor', exc_info=e)
 
 
 class SamMLBackend(LabelStudioMLBase):
