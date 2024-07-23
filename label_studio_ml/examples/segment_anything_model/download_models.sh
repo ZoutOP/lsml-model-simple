@@ -21,3 +21,5 @@ for model in "${!MODELS[@]}"; do
   echo "Downloading ${model} to ${MODELS_DIR}/..."
   download_model "${model}" "${MODELS[${model}]}"
 done
+
+
