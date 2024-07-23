@@ -15,6 +15,7 @@ _MODELS_DIR = pathlib.Path(__file__).parent / "models"
 VITH_CHECKPOINT = os.environ.get("VITH_CHECKPOINT", _MODELS_DIR / "sam_vit_h_4b8939.pth")
 ONNX_CHECKPOINT = os.environ.get("ONNX_CHECKPOINT", _MODELS_DIR / "sam_onnx_quantized_example.onnx")
 MOBILESAM_CHECKPOINT = os.environ.get("MOBILESAM_CHECKPOINT", _MODELS_DIR / "mobile_sam.pt")
+SIMPLE_MODEL_CHECKPOINT = os.environ.get("SIMPLE_MODEL_CHECKPOINT", _MODELS_DIR / "finetunet.pth")
 LABEL_STUDIO_ACCESS_TOKEN = os.environ.get("LABEL_STUDIO_ACCESS_TOKEN")
 LABEL_STUDIO_HOST = os.environ.get("LABEL_STUDIO_HOST")
 
@@ -67,6 +68,17 @@ class SAMPredictor(object):
                 raise FileNotFoundError("MOBILE_CHECKPOINT is not set: please set it to the path to the MobileSAM checkpoint")
             logger.info(f"Using MobileSAM checkpoint {self.model_checkpoint}")
             reg_key = 'vit_t'
+        elif model_choice == 'SIMPLE_MODEL':
+            from .simple_model_predictor import ModelSimple
+            from segment_anything import sam_model_registry  # use SAM model registory for vit_h
+
+            SamPredictor = ModelSimple(format_predictions=True, use_input=True)  # Create model simple as sam predictor.
+            self.model_checkpoint = SIMPLE_MODEL_CHECKPOINT
+            if not self.model_checkpoint:
+                raise FileNotFoundError("SIMPLE__MODEL is not set: please set it to the path to the SIMPLE_MODEL checkpoint")
+            logger.info(f"Using SIMPLE_MODEL checkpoint {self.model_checkpoint}")
+            reg_key = "vit_h"
+
         else:
             raise ValueError(f"Invalid model choice {model_choice}")
 
@@ -189,6 +201,38 @@ class SAMPredictor(object):
             'probs': [prob]
         }
 
+    def predict_simple_model(
+                          self,
+                          img_path,
+                          point_coords: Optional[List[List]] = None,
+                          point_labels: Optional[List] = None,
+                          input_box: Optional[List] = None,
+                          task: Optional[Dict] = None):
+        """ Predict using simple model. """
+        point_coords = np.array(point_coords, dtype=np.float32) if point_coords else None
+        point_labels = np.array(point_labels, dtype=np.float32) if point_labels else None
+        input_box = np.array(input_box, dtype=np.float32) if input_box else None
+
+        masks, probs, logits = self.predictor.forward(
+            self.predictor.get_image(img_path, task)[None],  # Use [None] to make into list.
+            point_coords=point_coords,
+            point_labels=point_labels,
+            box=input_box,
+            # TODO: support multimask output
+            multimask_output=False
+        )
+        if self.predictor.format_predictions:
+            mask = masks[0, :, :].astype(np.uint8)  # each mask has shape [H, W]
+            prob = float(probs[0])
+        else:
+            mask = masks
+            prob = probs
+        return {
+            'masks': [mask],
+            'probs': [prob]
+        }
+
+
     def predict(
         self, img_path: str,
         point_coords: Optional[List[List]] = None,
@@ -196,6 +240,8 @@ class SAMPredictor(object):
         input_box: Optional[List] = None,
         task: Optional[Dict] = None
     ):
+        if self.model_choice == 'SIMPLE_MODEL':
+            return self.predict_simple_model(img_path, point_coords, point_labels, input_box, task)
         if self.model_choice == 'ONNX':
             return self.predict_onnx(img_path, point_coords, point_labels, input_box, task)
         elif self.model_choice in ('SAM', 'MobileSAM'):
