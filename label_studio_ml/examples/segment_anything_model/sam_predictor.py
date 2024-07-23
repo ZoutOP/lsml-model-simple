@@ -35,7 +35,7 @@ class SAMPredictor(object):
         # if you're not using CUDA, use "cpu" instead .... good luck not burning your computer lol
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         logger.debug(f"Using device {self.device}")
-
+    
         if model_choice == 'ONNX':
             import onnxruntime
             from segment_anything import sam_model_registry, SamPredictor
