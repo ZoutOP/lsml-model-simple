@@ -30,7 +30,7 @@ RUN --mount=type=cache,target="/var/cache/apt",sharing=locked \
 COPY download_models.sh .
 RUN bash /app/download_models.sh
 
-COPY models/__init__.pt .  # Copy py init file
+COPY models/__init__.py .  # Copy py init file
 
 # install base requirements
 COPY requirements-base.txt .
