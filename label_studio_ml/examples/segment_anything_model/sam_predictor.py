@@ -68,7 +68,7 @@ class SAMPredictor(object):
             logger.info(f"Using MobileSAM checkpoint {self.model_checkpoint}")
             reg_key = 'vit_t'
         elif model_choice == 'SIMPLE_MODEL':
-            from .simple_model_predictor import ModelSimple
+            from simple_model_predictor import ModelSimple
             from segment_anything import sam_model_registry  # use SAM model registory for vit_h
 
             SamPredictor = ModelSimple(format_predictions=True, use_input=True)  # Create model simple as sam predictor.
